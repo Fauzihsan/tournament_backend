@@ -158,7 +158,6 @@ class AuthApiController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'min:10',
             'email' => 'email',
-            'password' => 'min:8',
             'role' => 'min:1',
         ]);
 
@@ -167,23 +166,54 @@ class AuthApiController extends Controller
             return ResponseFailed::make($errors, 500);
         }
 
-        $request['password'] = hash::make($request['password']);
+        $validated = $validator->validated();
 
-        if ($request['image'] != null) {
-            $image_64 = $request['image'];
+        if ($request['password'] == null) {
+            $data = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'role' => $validated['role'],
+                'image' => $request->image
+            ];
+        } else {
+            $validator2 = Validator::make($request['password'], ['password' => 'min:8']);
+            $validated2 = $validator2->validated();
+            $data = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => hash::make($validated2['password']),
+                'role' => $validated['role'],
+                'image' => $request->image
+            ];
+        }
+
+        if ($data['image'] != null) {
+            $image_64 = $data['image'];
             $extension = explode('/', explode(':', substr($image_64, 0, strpos($image_64, ';')))[1])[1];   // .jpg .png .pdf
             $replace = substr($image_64, 0, strpos($image_64, ',') + 1);
             $image = str_replace($replace, '', $image_64);
             $image = str_replace(' ', '+', $image);
             $imageName = Str::random(10) . '.' . $extension;
             Storage::disk('public')->put($imageName, base64_decode($image));
-            $request['image'] = $imageName;
+            $data['image'] = $imageName;
         }
         try {
-            $data = User::find($request->id);
+            $data_u = User::find($request->id);
 
-            $data->update($request->all());
+            $data_u->update($data);
 
+            return ResponseSuccess::make($data_u);
+        } catch (Exception) {
+            return ResponseFailed::make();
+        }
+    }
+
+    public function delete(Request $request)
+    {
+        try {
+            // $data = User::all()->where('id', $request->id)->first();
+            $data = User::find($request->get('id'));
+            $data->delete($data);
             return ResponseSuccess::make($data);
         } catch (Exception) {
             return ResponseFailed::make();
