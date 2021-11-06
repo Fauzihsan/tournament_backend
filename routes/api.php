@@ -26,4 +26,4 @@ Route::post('register', [AuthApiController::class, 'register']);
 Route::get('view/{id}', [AuthApiController::class, 'view']);
 Route::get('showAll/', [AuthApiController::class, 'showAll']);
 Route::match(['patch', 'post', 'get'], 'update/{id}', [AuthApiController::class, 'update']);
-Route::match(['delete', 'get'], 'delete/{id}', [AuthApiController::class, 'delete']);
+Route::delete('delete/{id}', [AuthApiController::class, 'delete']);

@@ -168,23 +168,18 @@ class AuthApiController extends Controller
 
         $validated = $validator->validated();
 
-        if ($request['password'] == null) {
-            $data = [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'role' => $validated['role'],
-                'image' => $request->image
-            ];
-        } else {
-            $validator2 = Validator::make($request['password'], ['password' => 'min:8']);
-            $validated2 = $validator2->validated();
-            $data = [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => hash::make($validated2['password']),
-                'role' => $validated['role'],
-                'image' => $request->image
-            ];
+
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'image' => $request->image
+        ];
+        if ($request['password'] != null) {
+            if (strlen($request['password']) < 8) {
+                return ResponseFailed::make("PASSWORD MINIMAL 8", 500);
+            }
+            $data['password'] = hash::make($request['password']);
         }
 
         if ($data['image'] != null) {
@@ -211,8 +206,7 @@ class AuthApiController extends Controller
     public function delete(Request $request)
     {
         try {
-            // $data = User::all()->where('id', $request->id)->first();
-            $data = User::find($request->get('id'));
+            $data = User::all()->where('id', $request->id)->first();
             $data->delete($data);
             return ResponseSuccess::make($data);
         } catch (Exception) {
