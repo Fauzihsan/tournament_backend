@@ -27,3 +27,4 @@ Route::get('view/{id}', [AuthApiController::class, 'view']);
 Route::get('showAll/', [AuthApiController::class, 'showAll']);
 Route::match(['patch', 'post', 'get'], 'update/{id}', [AuthApiController::class, 'update']);
 Route::delete('delete/{id}', [AuthApiController::class, 'delete']);
+Route::get('image/', [AuthApiController::class, 'getImage']);

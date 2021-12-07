@@ -153,6 +153,11 @@ class AuthApiController extends Controller
         return json_encode($result);
     }
 
+    public function getImage()
+    {
+        return response()->file(public_path("/storage/ze2DfRJEPh.jpeg"));
+    }
+
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
